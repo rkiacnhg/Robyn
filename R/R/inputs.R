@@ -189,6 +189,7 @@ robyn_inputs <- function(dt_input = NULL,
                          ...) {
 
   ### Use case 1: running robyn_inputs() for the first time
+  print("test kyle")
   if (is.null(InputCollect)) {
     dt_input <- as.data.table(dt_input)
     dt_holidays <- as.data.table(dt_holidays)
