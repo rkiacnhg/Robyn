@@ -639,7 +639,8 @@ robyn_engineering <- function(x, ...) {
       context_vars = InputCollect$context_vars,
       paid_media_spends = paid_media_spends,
       intervalType = InputCollect$intervalType,
-      custom_params = custom_params
+      custom_params = custom_params,
+      ...
     )
   }
 
@@ -665,6 +666,8 @@ robyn_engineering <- function(x, ...) {
 #' When \code{prophet_vars} in \code{robyn_inputs()} is specified, this
 #' function decomposes trend, season, holiday and weekday from the
 #' dependent variable.
+#'
+#' @inheritParams prophet::prophet
 #' @param dt_transform A data.frame with all model features.
 #' @param dt_holidays As in \code{robyn_inputs()}
 #' @param prophet_country As in \code{robyn_inputs()}
@@ -675,12 +678,16 @@ robyn_engineering <- function(x, ...) {
 #' @param paid_media_spends As in \code{robyn_inputs()}
 #' @param intervalType As included in \code{InputCollect}
 #' @param custom_params List. Custom parameters passed to \code{prophet()}
+#' @param logistic_cap,logistic_floor Numeric vector or value. When
+#' \code{growth = "logistic"}, the upper and lower bounds for saturation.
 #' @return A list containing all prophet decomposition output.
 prophet_decomp <- function(dt_transform, dt_holidays,
                            prophet_country, prophet_vars, prophet_signs,
                            factor_vars, context_vars, paid_media_spends,
-                           intervalType, custom_params) {
-  check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs)
+                           intervalType, custom_params,
+                           growth = "linear", logistic_cap = NULL, logistic_floor = NULL) {
+
+  check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs, growth, logistic_cap, logistic_floor)
   recurrence <- subset(dt_transform, select = c("ds", "dep_var"))
   colnames(recurrence)[2] <- "y"
 
@@ -700,7 +707,8 @@ prophet_decomp <- function(dt_transform, dt_holidays,
     weekly.seasonality = ifelse("weekly.seasonality" %in% names(custom_params),
                                 custom_params[["weekly.seasonality"]],
                                 use_weekday),
-    daily.seasonality = FALSE # No hourly models allowed
+    daily.seasonality = FALSE, # No hourly models allowed
+    growth = growth
   )
   prophet_params <- append(prophet_params, custom_params)
   modelRecurrence <- do.call(prophet, as.list(prophet_params))
@@ -710,6 +718,7 @@ prophet_decomp <- function(dt_transform, dt_holidays,
     ohe_names <- names(dt_ohe)
     for (addreg in ohe_names) modelRecurrence <- add_regressor(modelRecurrence, addreg)
     dt_ohe <- cbind(dt_regressors[, !factor_vars, with = FALSE], dt_ohe)
+    dt_ohe <- .add_cap_floor(dt_ohe, growth, logistic_cap, logistic_floor)
     mod_ohe <- fit.prophet(modelRecurrence, dt_ohe)
     dt_forecastRegressor <- predict(mod_ohe, dt_ohe)
     forecastRecurrence <- dt_forecastRegressor[, str_detect(
@@ -723,6 +732,7 @@ prophet_decomp <- function(dt_transform, dt_holidays,
       dt_transform[, (aggreg) := scale(get_reg, center = min(get_reg), scale = FALSE)]
     }
   } else {
+    dt_regressors <- .add_cap_floor(dt_regressors, growth, logistic_cap, logistic_floor)
     mod <- fit.prophet(modelRecurrence, dt_regressors)
     forecastRecurrence <- predict(mod, dt_regressors)
   }
@@ -741,6 +751,15 @@ prophet_decomp <- function(dt_transform, dt_holidays,
   }
 
   return(dt_transform)
+}
+
+# Add logistic cap / floor
+.add_cap_floor <- function(df, growth, logistic_cap, logistic_floor) {
+  if (growth == "logistic") {
+    df$cap <- logistic_cap
+    df$floor <- logistic_floor
+  }
+  return(df)
 }
 
 ####################################################################
