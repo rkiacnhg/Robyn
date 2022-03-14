@@ -14,7 +14,10 @@ prophet_decomp(
   context_vars,
   paid_media_spends,
   intervalType,
-  custom_params
+  custom_params,
+  growth = "linear",
+  logistic_cap = NULL,
+  logistic_floor = NULL
 )
 }
 \arguments{
@@ -37,6 +40,12 @@ prophet_decomp(
 \item{intervalType}{As included in \code{InputCollect}}
 
 \item{custom_params}{List. Custom parameters passed to \code{prophet()}}
+
+\item{growth}{String 'linear', 'logistic', or 'flat' to specify a linear, logistic
+or flat trend.}
+
+\item{logistic_cap, logistic_floor}{Numeric vector or value. When
+\code{growth = "logistic"}, the upper and lower bounds for saturation.}
 }
 \value{
 A list containing all prophet decomposition output.
