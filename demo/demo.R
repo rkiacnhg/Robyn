@@ -99,6 +99,9 @@ InputCollect <- robyn_inputs(
   ,window_start = "2016-11-23"
   ,window_end = "2018-08-22"
   ,adstock = "geometric" # geometric, weibull_cdf or weibull_pdf.
+  ,growth = "logistic"
+  ,logistic_floor = 0
+  ,logistic_cap = 300
 )
 print(InputCollect)
 # ?robyn_inputs for more info

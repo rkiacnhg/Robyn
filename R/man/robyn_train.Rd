@@ -10,8 +10,8 @@ robyn_train(
   cores,
   iterations,
   trials,
-  intercept_sign,
-  nevergrad_algo,
+  intercept_sign = "non_negative",
+  nevergrad_algo = "TwoPointsDE",
   dt_hyper_fixed = NULL,
   add_penalty_factor = FALSE,
   refresh = FALSE,
@@ -23,8 +23,8 @@ robyn_train(
 \item{InputCollect}{List. Contains all input parameters for the model.
 Required when \code{robyn_object} is not provided.}
 
-\item{hyper_collect}{List. Containing hyperparameter bounds. Defaults to
-\code{InputCollect$hyperparameters}.}
+\item{hyper_collect}{List. Containing hyperparameter bounds, built with
+\code{hyper_collector()}.}
 
 \item{cores}{Integer. Default to \code{parallel::detectCores()} (max cores).}
 

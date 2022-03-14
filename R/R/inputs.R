@@ -196,7 +196,7 @@ robyn_inputs <- function(dt_input = NULL,
     ## Check dependent var
     check_depvar(dt_input, dep_var, dep_var_type)
 
-    ## Check prophet
+    ## Check and add prophet signs if not provided
     prophet_signs <- check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs, ...)
 
     ## Check baseline variables (and maybe transform context_signs)
@@ -285,7 +285,7 @@ robyn_inputs <- function(dt_input = NULL,
       adstock = adstock,
       hyperparameters = hyperparameters,
       calibration_input = calibration_input,
-      ...
+      custom_params = list(...)
     )
 
     ### Use case 1: running robyn_inputs() for the first time
@@ -322,7 +322,6 @@ robyn_inputs <- function(dt_input = NULL,
       output <- robyn_engineering(InputCollect, ...)
     }
   }
-  output$custom_params <- list(...)
   class(output) <- c("robyn_inputs", class(output))
   return(output)
 }
@@ -620,15 +619,8 @@ robyn_engineering <- function(x, ...) {
     if (length(InputCollect[["custom_params"]]) > 0) {
       custom_params <- InputCollect[["custom_params"]]
     }
-    robyn_args <- setdiff(
-      unique(c(names(as.list(args(robyn_run))),
-               names(as.list(args(robyn_outputs))),
-               names(as.list(args(robyn_inputs))),
-               names(as.list(args(robyn_refresh))))),
-      c("", "..."))
-    prophet_custom_args <- setdiff(names(custom_params), robyn_args)
-    if (length(prophet_custom_args)>0)
-      message(paste("Using custom prophet parameters:", paste(names(prophet_custom_args), collapse = ", ")))
+    if (length(custom_params) > 0)
+      message(paste("Using custom prophet parameters:", paste(names(custom_params), collapse = ", ")))
     dt_transform <- prophet_decomp(
       dt_transform,
       dt_holidays = InputCollect$dt_holidays,
@@ -656,6 +648,7 @@ robyn_engineering <- function(x, ...) {
   InputCollect[["yhatNLSCollect"]] <- yhatNLSCollect
   InputCollect[["exposure_selector"]] <- exposure_selector
   InputCollect[["mediaCostFactor"]] <- mediaCostFactor
+  InputCollect[["custom_params"]] <- custom_params
   return(InputCollect)
 }
 
@@ -667,7 +660,6 @@ robyn_engineering <- function(x, ...) {
 #' function decomposes trend, season, holiday and weekday from the
 #' dependent variable.
 #'
-#' @inheritParams prophet::prophet
 #' @param dt_transform A data.frame with all model features.
 #' @param dt_holidays As in \code{robyn_inputs()}
 #' @param prophet_country As in \code{robyn_inputs()}
@@ -678,19 +670,14 @@ robyn_engineering <- function(x, ...) {
 #' @param paid_media_spends As in \code{robyn_inputs()}
 #' @param intervalType As included in \code{InputCollect}
 #' @param custom_params List. Custom parameters passed to \code{prophet()}
-#' @param logistic_cap,logistic_floor Numeric vector or value. When
-#' \code{growth = "logistic"}, the upper and lower bounds for saturation.
 #' @param ... Additional parameters
 #' @return A list containing all prophet decomposition output.
 prophet_decomp <- function(dt_transform, dt_holidays,
                            prophet_country, prophet_vars, prophet_signs,
                            factor_vars, context_vars, paid_media_spends,
-                           intervalType, custom_params,
-                           growth = "linear",
-                           logistic_cap = NULL,
-                           logistic_floor = NULL, ...) {
+                           intervalType, custom_params, ...) {
 
-  check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs, growth, logistic_cap, logistic_floor)
+  check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs, custom_params)
   recurrence <- subset(dt_transform, select = c("ds", "dep_var"))
   colnames(recurrence)[2] <- "y"
 
@@ -710,8 +697,7 @@ prophet_decomp <- function(dt_transform, dt_holidays,
     weekly.seasonality = ifelse("weekly.seasonality" %in% names(custom_params),
                                 custom_params[["weekly.seasonality"]],
                                 use_weekday),
-    daily.seasonality = FALSE, # No hourly models allowed
-    growth = growth
+    daily.seasonality = FALSE # No hourly models allowed
   )
   prophet_params <- append(prophet_params, custom_params)
   modelRecurrence <- do.call(prophet, as.list(prophet_params))
@@ -721,7 +707,7 @@ prophet_decomp <- function(dt_transform, dt_holidays,
     ohe_names <- names(dt_ohe)
     for (addreg in ohe_names) modelRecurrence <- add_regressor(modelRecurrence, addreg)
     dt_ohe <- cbind(dt_regressors[, !factor_vars, with = FALSE], dt_ohe)
-    dt_ohe <- .add_cap_floor(dt_ohe, growth, logistic_cap, logistic_floor)
+    dt_ohe <- .add_cap_floor(dt_ohe, custom_params$growth, custom_params$logistic_cap, custom_params$logistic_floor)
     mod_ohe <- fit.prophet(modelRecurrence, dt_ohe)
     dt_forecastRegressor <- predict(mod_ohe, dt_ohe)
     forecastRecurrence <- dt_forecastRegressor[, str_detect(
@@ -735,7 +721,8 @@ prophet_decomp <- function(dt_transform, dt_holidays,
       dt_transform[, (aggreg) := scale(get_reg, center = min(get_reg), scale = FALSE)]
     }
   } else {
-    dt_regressors <- .add_cap_floor(dt_regressors, growth, logistic_cap, logistic_floor)
+    dt_regressors <- .add_cap_floor(
+      dt_regressors, custom_params$growth, custom_params$logistic_cap, custom_params$logistic_floor)
     mod <- fit.prophet(modelRecurrence, dt_regressors)
     forecastRecurrence <- predict(mod, dt_regressors)
   }
@@ -758,9 +745,11 @@ prophet_decomp <- function(dt_transform, dt_holidays,
 
 # Add logistic cap / floor
 .add_cap_floor <- function(df, growth, logistic_cap, logistic_floor) {
-  if (growth == "logistic") {
-    df$cap <- logistic_cap
-    df$floor <- logistic_floor
+  if (!is.null(growth)) {
+    if (growth == "logistic") {
+      df$cap <- logistic_cap
+      df$floor <- logistic_floor
+    }
   }
   return(df)
 }

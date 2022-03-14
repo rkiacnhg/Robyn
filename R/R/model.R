@@ -196,12 +196,13 @@ Pareto-front ({x$pareto_fronts}) All solutions ({nSols}): {paste(x$allSolutions,
 #' and runs the \code{robyn_mmm()} on each trial.
 #'
 #' @inheritParams robyn_run
-#' @param hyper_collect List. Containing hyperparameter bounds. Defaults to
-#' \code{InputCollect$hyperparameters}.
+#' @param hyper_collect List. Containing hyperparameter bounds, built with
+#' \code{hyper_collector()}.
 #' @export
 robyn_train <- function(InputCollect, hyper_collect,
                         cores, iterations, trials,
-                        intercept_sign, nevergrad_algo,
+                        intercept_sign = "non_negative",
+                        nevergrad_algo = "TwoPointsDE",
                         dt_hyper_fixed = NULL,
                         add_penalty_factor = FALSE,
                         refresh = FALSE, seed = 123,
@@ -298,9 +299,9 @@ robyn_train <- function(InputCollect, hyper_collect,
 robyn_mmm <- function(InputCollect,
                       hyper_collect,
                       iterations,
-                      cores,
-                      nevergrad_algo,
-                      intercept_sign,
+                      cores = NULL,
+                      nevergrad_algo = "TwoPointsDE",
+                      intercept_sign = "non_negative",
                       add_penalty_factor = FALSE,
                       dt_hyper_fixed = NULL,
                       # lambda_fixed = NULL,
@@ -398,11 +399,10 @@ robyn_mmm <- function(InputCollect,
 
   ################################################
   #### Get lambda
-  lambda_min_ratio <- 0.0001 # default  value from glmnet
+  lambda_min_ratio <- 0.0001 # default value from glmnet
   lambdas <- lambda_seq(x = dt_mod[, !c("ds", "dep_var"), with = FALSE],
                         y = dt_mod$dep_var,
                         seq_len = 100, lambda_min_ratio)
-  lambda_min_ratio
   lambda_max <- max(lambdas) * 0.1
   lambda_min <- lambda_max * lambda_min_ratio
 
