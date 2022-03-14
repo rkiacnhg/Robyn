@@ -131,7 +131,10 @@ check_depvar <- function(dt_input, dep_var, dep_var_type) {
   }
 }
 
-check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_signs, growth, logistic_cap, logistic_floor) {
+check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_signs,
+                          growth = "linear",
+                          logistic_cap = NULL,
+                          logistic_floor = NULL) {
   if (is.null(prophet_vars)) {
     prophet_signs <- NULL
     prophet_country <- NULL
@@ -142,7 +145,7 @@ check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_si
       stop("Allowed values for 'prophet_vars' are: ", paste(opts, collapse = ", "))
     }
     opts <- c("linear", "logistic")
-    if (growth %in% opts) {
+    if (!growth %in% opts) {
       stop("Allowed values for 'growth' are: ", paste(opts, collapse = ", "))
     }
     if (growth == "logistic") {

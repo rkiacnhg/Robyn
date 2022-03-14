@@ -176,34 +176,34 @@ robyn_inputs <- function(dt_input = NULL,
     dt_input <- as.data.table(dt_input)
     dt_holidays <- as.data.table(dt_holidays)
 
-    # check for NA values
+    # Check for NA values
     check_nas(dt_input)
     check_nas(dt_holidays)
 
-    # check vars names (duplicates and valid)
+    # Check vars names (duplicates and valid)
     check_varnames(dt_input, dt_holidays,
                    dep_var, date_var,
                    context_vars, paid_media_spends,
                    organic_vars)
 
-    ## check date input (and set dayInterval and intervalType)
+    ## Check date input (and set dayInterval and intervalType)
     date_input <- check_datevar(dt_input, date_var)
     dt_input <- date_input$dt_input # sort date by ascending
     date_var <- date_input$date_var # when date_var = "auto"
     dayInterval <- date_input$dayInterval
     intervalType <- date_input$intervalType
 
-    ## check dependent var
+    ## Check dependent var
     check_depvar(dt_input, dep_var, dep_var_type)
 
-    ## check prophet
-    prophet_signs <- check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs)
+    ## Check prophet
+    prophet_signs <- check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs, ...)
 
-    ## check baseline variables (and maybe transform context_signs)
+    ## Check baseline variables (and maybe transform context_signs)
     context <- check_context(dt_input, context_vars, context_signs)
     context_signs <- context$context_signs
 
-    ## check paid media variables (set mediaVarCount and maybe transform paid_media_signs)
+    ## Check paid media variables (set mediaVarCount and maybe transform paid_media_signs)
     paidmedia <- check_paidmedia(dt_input, paid_media_vars, paid_media_signs, paid_media_spends)
     paid_media_signs <- paidmedia$paid_media_signs
     mediaVarCount <- paidmedia$mediaVarCount
@@ -680,12 +680,15 @@ robyn_engineering <- function(x, ...) {
 #' @param custom_params List. Custom parameters passed to \code{prophet()}
 #' @param logistic_cap,logistic_floor Numeric vector or value. When
 #' \code{growth = "logistic"}, the upper and lower bounds for saturation.
+#' @param ... Additional parameters
 #' @return A list containing all prophet decomposition output.
 prophet_decomp <- function(dt_transform, dt_holidays,
                            prophet_country, prophet_vars, prophet_signs,
                            factor_vars, context_vars, paid_media_spends,
                            intervalType, custom_params,
-                           growth = "linear", logistic_cap = NULL, logistic_floor = NULL) {
+                           growth = "linear",
+                           logistic_cap = NULL,
+                           logistic_floor = NULL, ...) {
 
   check_prophet(dt_holidays, prophet_country, prophet_vars, prophet_signs, growth, logistic_cap, logistic_floor)
   recurrence <- subset(dt_transform, select = c("ds", "dep_var"))

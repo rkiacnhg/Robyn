@@ -17,7 +17,8 @@ prophet_decomp(
   custom_params,
   growth = "linear",
   logistic_cap = NULL,
-  logistic_floor = NULL
+  logistic_floor = NULL,
+  ...
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ or flat trend.}
 
 \item{logistic_cap, logistic_floor}{Numeric vector or value. When
 \code{growth = "logistic"}, the upper and lower bounds for saturation.}
+
+\item{...}{Additional parameters}
 }
 \value{
 A list containing all prophet decomposition output.
