@@ -131,10 +131,7 @@ check_depvar <- function(dt_input, dep_var, dep_var_type) {
   }
 }
 
-check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_signs,
-                          growth = "linear",
-                          logistic_cap = NULL,
-                          logistic_floor = NULL) {
+check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_signs, custom_params) {
   if (is.null(prophet_vars)) {
     prophet_signs <- NULL
     prophet_country <- NULL
@@ -144,14 +141,16 @@ check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_si
     if (!all(prophet_vars %in% opts)) {
       stop("Allowed values for 'prophet_vars' are: ", paste(opts, collapse = ", "))
     }
-    opts <- c("linear", "logistic")
-    if (!growth %in% opts) {
-      stop("Allowed values for 'growth' are: ", paste(opts, collapse = ", "))
-    }
-    if (growth == "logistic") {
-      if (all(c(is.null(logistic_cap), is.null(logistic_floor)))) {
-        stop(paste("Capacities must be supplied for `growth = 'logistic'.",
-                   "Try specifying at least one of 'logistic_cap' or 'logistic_floor'"))
+    if (!is.null(custom_params$growth)) {
+      opts <- c("linear", "logistic")
+      if (!custom_params$growth %in% opts) {
+        stop("Allowed values for 'growth' are: ", paste(opts, collapse = ", "))
+      }
+      if (custom_params$growth == "logistic") {
+        if (all(c(is.null(custom_params$logistic_cap), is.null(custom_params$logistic_floor)))) {
+          stop(paste("Capacities must be supplied for `growth = 'logistic'.",
+                     "Try specifying at least one of 'logistic_cap' or 'logistic_floor'"))
+        }
       }
     }
     if (is.null(prophet_country) | length(prophet_country) > 1 |
