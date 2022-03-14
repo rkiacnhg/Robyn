@@ -147,9 +147,9 @@ check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_si
         stop("Allowed values for 'growth' are: ", paste(opts, collapse = ", "))
       }
       if (custom_params$growth == "logistic") {
-        if (all(c(is.null(custom_params$logistic_cap), is.null(custom_params$logistic_floor)))) {
+        if (is.null(custom_params$logistic_cap)) {
           stop(paste("Capacities must be supplied for `growth = 'logistic'.",
-                     "Try specifying at least one of 'logistic_cap' or 'logistic_floor'"))
+                     "Please specify 'logistic_cap' and optionally 'logistic_floor'"))
         }
       }
     }

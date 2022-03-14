@@ -98,10 +98,7 @@ InputCollect <- robyn_inputs(
   ,factor_vars = c("events") # specify which variables in context_vars or organic_vars are factorial
   ,window_start = "2016-11-23"
   ,window_end = "2018-08-22"
-  ,adstock = "geometric" # geometric, weibull_cdf or weibull_pdf.
-  ,growth = "logistic"
-  ,logistic_floor = 0
-  ,logistic_cap = 300
+  ,adstock = "geometric" # geometric, weibull_cdf or weibull_pdf
 )
 print(InputCollect)
 # ?robyn_inputs for more info
