@@ -423,7 +423,7 @@ robyn_mmm <- function(InputCollect,
 
   ################################################
   #### Collect hyperparameters
-
+  
   if (TRUE) {
     hypParamSamName <- names(hyper_collect$hyper_list_all)
     # Optimization hyper-parameters
@@ -652,7 +652,7 @@ robyn_mmm <- function(InputCollect,
                 upper.limits <- c(upper.limits, upper_vec)
                 print(653)
                 print(upper.limits)
-                1/0
+                stop()
               } else {
                 lower_temp = if(x_sign[s] == "positive"){
                   0
@@ -672,7 +672,7 @@ robyn_mmm <- function(InputCollect,
                 upper.limits <- c(upper.limits, upper_temp)
                 print(673)
                 print(upper.limits)
-                1/0
+                stop()
               }
             }
 
