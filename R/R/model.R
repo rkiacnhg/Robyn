@@ -650,6 +650,9 @@ robyn_mmm <- function(InputCollect,
                 }
                 lower.limits <- c(lower.limits, lower_vec)
                 upper.limits <- c(upper.limits, upper_vec)
+                print(653)
+                print(upper.limits)
+                1/0
               } else {
                 lower_temp = if(x_sign[s] == "positive"){
                   0
@@ -667,6 +670,7 @@ robyn_mmm <- function(InputCollect,
                 }
                 lower.limits <- c(lower.limits, lower_temp)
                 upper.limits <- c(upper.limits, upper_temp)
+                print(673)
                 print(upper.limits)
                 1/0
               }
