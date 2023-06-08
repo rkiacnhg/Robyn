@@ -636,17 +636,22 @@ robyn_mmm <- function(InputCollect,
                 }
                 lower_vec <- if (x_sign[s] == "positive") {
                   rep(0, level.n - 1)
-                } else {
+                } else if (x_sign[s] == "context"){
+                  rep(1,level.n - 1)
+                } else{
                   rep(-Inf, level.n - 1)
                 }
                 upper_vec <- if (x_sign[s] == "negative") {
                   rep(0, level.n - 1)
+                } else if (x_sign[s] == "context"){
+                  rep(3,level.n - 1)
                 } else {
                   rep(Inf, level.n - 1)
                 }
                 lower.limits <- c(lower.limits, lower_vec)
                 upper.limits <- c(upper.limits, upper_vec)
               } else {
+                print("model.R 654")
                 lower.limits <- c(lower.limits, ifelse(x_sign[s] == "positive", 0, -Inf))
                 upper.limits <- c(upper.limits, ifelse(x_sign[s] == "negative", 0, Inf))
               }

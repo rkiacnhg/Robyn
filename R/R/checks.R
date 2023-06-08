@@ -194,9 +194,9 @@ check_prophet <- function(dt_holidays, prophet_country, prophet_vars, prophet_si
 check_context <- function(dt_input, context_vars, context_signs) {
   if (!is.null(context_vars)) {
     if (is.null(context_signs)) context_signs <- rep("default", length(context_vars))
-    if (!all(context_signs %in% OPTS_PDN)) {
-      stop("Allowed values for 'context_signs' are: ", paste(OPTS_PDN, collapse = ", "))
-    }
+    # if (!all(context_signs %in% OPTS_PDN)) {
+    #   stop("Allowed values for 'context_signs' are: ", paste(OPTS_PDN, collapse = ", "))
+    # }
     if (length(context_signs) != length(context_vars)) {
       stop("Input 'context_signs' must have same length as 'context_vars'")
     }
