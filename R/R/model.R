@@ -667,6 +667,8 @@ robyn_mmm <- function(InputCollect,
                 }
                 lower.limits <- c(lower.limits, lower_temp)
                 upper.limits <- c(upper.limits, upper_temp)
+                print(upper.limits)
+                1/0
               }
             }
 
