@@ -420,7 +420,7 @@ robyn_mmm <- function(InputCollect,
       "https://github.com/facebookexperimental/Robyn/blob/main/demo/install_nevergrad.R"
     )
   }
-  stop("STOPPING 423")
+  
   ################################################
   #### Collect hyperparameters
   
@@ -650,9 +650,6 @@ robyn_mmm <- function(InputCollect,
                 }
                 lower.limits <- c(lower.limits, lower_vec)
                 upper.limits <- c(upper.limits, upper_vec)
-                print(653)
-                print(upper.limits)
-                stop()
               } else {
                 lower_temp = if(x_sign[s] == "positive"){
                   0
@@ -670,12 +667,9 @@ robyn_mmm <- function(InputCollect,
                 }
                 lower.limits <- c(lower.limits, lower_temp)
                 upper.limits <- c(upper.limits, upper_temp)
-                print(673)
-                print(upper.limits)
-                stop()
               }
             }
-
+            print(upper.limits)
             #####################################
             #### Fit ridge regression with nevergrad's lambda
             # lambdas <- lambda_seq(x_train, y_train, seq_len = 100, lambda_min_ratio = 0.0001)
