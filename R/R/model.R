@@ -654,14 +654,14 @@ robyn_mmm <- function(InputCollect,
                 lower_temp = if(x_sign[s] == "positive"){
                   0
                 } else if(x_sign[s] == "context"){
-                  1
+                  0
                 } else if(x_sign[s] == "negative"){
                   -Inf
                 }
                 upper_temp = if(x_sign[s] == "positive"){
                   Inf
                 } else if(x_sign[s] == "context"){
-                  3
+                  2.5
                 } else if(x_sign[s] == "negative"){
                   0
                 }
@@ -669,7 +669,7 @@ robyn_mmm <- function(InputCollect,
                 upper.limits <- c(upper.limits, upper_temp)
               }
             }
-            print(upper.limits)
+            
             #####################################
             #### Fit ridge regression with nevergrad's lambda
             # lambdas <- lambda_seq(x_train, y_train, seq_len = 100, lambda_min_ratio = 0.0001)
