@@ -651,9 +651,22 @@ robyn_mmm <- function(InputCollect,
                 lower.limits <- c(lower.limits, lower_vec)
                 upper.limits <- c(upper.limits, upper_vec)
               } else {
-                print("model.R 654")
-                lower.limits <- c(lower.limits, ifelse(x_sign[s] == "positive", 0, -Inf))
-                upper.limits <- c(upper.limits, ifelse(x_sign[s] == "negative", 0, Inf))
+                lower_temp = if(x_sign[s] == "positive"){
+                  0
+                } else if(x_sign[s] == "context"){
+                  1
+                } else if(x_sign[s] == "negative"){
+                  -Inf
+                }
+                upper_temp = if(x_sign[s] == "positive"){
+                  Inf
+                } else if(x_sign[s] == "context"){
+                  3
+                } else if(x_sign[s] == "negative"){
+                  0
+                }
+                lower.limits <- c(lower.limits, lower_temp)
+                upper.limits <- c(upper.limits, upper_temp)
               }
             }
 
